@@ -1,0 +1,10 @@
+---
+- name: Create k8s Master
+  hosts: all
+  gather_facts: true
+  become: yes
+  become_method: sudo
+  tags: [k8smaster]
+  roles:
+  - k8scommon
+  - k8smaster

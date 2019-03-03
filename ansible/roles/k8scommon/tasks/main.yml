@@ -1,0 +1,63 @@
+- name: Disable SELinux
+  selinux:
+    state: disabled
+
+- name: setenforce 0
+  command: setenforce 0
+
+- name: setenforce 0
+  command: sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+
+- name: Allow Required Ports
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: "{{ item }}"
+    ctstate: NEW,ESTABLISHED
+    jump: ACCEPT
+  with_items: "{{ list_of_ports }}"
+
+- name: delete repo file if exists
+  file:
+    path: /etc/yum.repos.d/kubernetes.repo
+    state: absent
+
+# - name: Add docker repo
+#   command: yum-config-manager --add-repo  https://download.docker.com/linux/centos/docker-ce.repo
+
+- name: Adding kubernetes repo
+  blockinfile:
+    dest: /etc/yum.repos.d/kubernetes.repo
+    block: |
+          [kubernetes]
+          name=Kubernetes
+          baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+          enabled=1
+          gpgcheck=1
+          repo_gpgcheck=1
+          gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
+                  https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+    state: present
+    create: yes
+
+# - name: Install all packages dependencies
+#   yum:
+#     name: "*"
+#     state: latest
+
+
+
+- name: Install all packages dependencies
+  package:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items: "{{ list_of_packages }}"
+
+
+- name: Start and Enable docker and kubeadm
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items: "{{ services_to_startenable }}"

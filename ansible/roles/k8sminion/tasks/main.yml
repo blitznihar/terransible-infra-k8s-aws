@@ -1,0 +1,2 @@
+- name: join worker nodes to master node
+  script: joincommand.sh

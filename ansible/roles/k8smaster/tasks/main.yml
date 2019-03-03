@@ -1,0 +1,57 @@
+---
+- name: Reset Kubernetes Cluster
+  shell: kubeadm reset -f
+
+- name: Initialize Kubernetes CLuster
+  shell: kubeadm init
+
+- name: pause for Kubernetes Cluster to Initialize
+  pause:
+    seconds: 30
+
+- name: create .kube directory
+  file: 
+    path: ~/.kube
+    state: directory
+
+- name: Copy kube config to .kube folder
+  copy: 
+    src: /etc/kubernetes/admin.conf
+    dest: ~/.kube/config
+    remote_src: yes
+
+- name: Change owner of the config file
+  shell: chown $(id -u):$(id -g) ~/.kube/config
+
+# - name: export var
+#   command: export kubever=$(kubectl version | base64 | tr -d '\n')
+
+- name: deploy overlay network
+  command: kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=v1.13"
+  
+
+- name: Capture command to run
+  command: kubeadm token create --print-join-command
+  register: torun
+
+- name: Print command to run
+  debug:
+    var: torun.stdout_lines
+
+- name: Capture command to run
+  shell: kubeadm token create --print-join-command > /tmp/joincommand.sh
+  register: torun
+
+# - name: cleanup
+#   local_action: 
+#     module: file
+#     path: ..//files/joincommand.sh
+#     state: absent
+
+- name: Ansible fetch files from remote server to the local machine using Ansible fetch module
+  fetch:
+    src: /tmp/joincommand.sh
+    dest: ./roles/k8sminion/files/
+    flat: yes
+    mode: 0774
+    fail_on_missing: yes

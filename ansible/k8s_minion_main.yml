@@ -1,0 +1,10 @@
+---
+- name: Create k8s Minion
+  hosts: all
+  gather_facts: true
+  become: yes
+  become_method: sudo
+  tags: [k8sminion]
+  roles:
+  - k8scommon
+  - k8sminion
