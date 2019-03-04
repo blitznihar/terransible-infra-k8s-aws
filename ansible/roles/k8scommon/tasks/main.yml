@@ -8,6 +8,22 @@
 - name: setenforce 0
   command: sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
 
+- name: modprobe
+  modprobe:
+    name: br_netfilter
+    state: present
+
+- name: modprobe 2
+  shell: sysctl -p
+
+- name: update kernel settings
+  sysctl:
+    name: net.bridge.bridge-nf-call-iptables
+    value: 1
+    sysctl_set: yes
+    state: present
+    reload: yes
+
 - name: Allow Required Ports
   iptables:
     chain: INPUT

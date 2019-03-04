@@ -107,6 +107,30 @@ resource "aws_security_group" "aws_security_group_devops" {
     protocol    = "tcp"
     cidr_blocks = ["${var.access_ip}"]
   }
+  ingress {
+    from_port   = 10250
+    to_port     = 10255
+    protocol    = "tcp"
+    cidr_blocks = ["${var.cidr_block}"]
+  }
+  ingress {
+    from_port   = 2379
+    to_port     = 2380
+    protocol    = "tcp"
+    cidr_blocks = ["${var.cidr_block}"]
+  }
+  ingress {
+    from_port   = 30000
+    to_port     = 32767
+    protocol    = "tcp"
+    cidr_blocks = ["${var.access_ip}"]
+  }
+  ingress {
+    from_port   = 8000
+    to_port     = 9200
+    protocol    = "tcp"
+    cidr_blocks = ["${var.access_ip}"]
+  }
   egress {
     from_port   = 0
     to_port     = 0
@@ -116,6 +140,12 @@ resource "aws_security_group" "aws_security_group_devops" {
   ingress {
     from_port   = 6443
     to_port     = 6443
+    protocol    = "tcp"
+    cidr_blocks = ["${var.access_ip}"]
+  }
+  ingress {
+    from_port   = 6781
+    to_port     = 6785
     protocol    = "tcp"
     cidr_blocks = ["${var.access_ip}"]
   }

@@ -26,10 +26,6 @@
 # - name: export var
 #   command: export kubever=$(kubectl version | base64 | tr -d '\n')
 
-- name: deploy overlay network
-  command: kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=v1.13"
-  
-
 - name: Capture command to run
   command: kubeadm token create --print-join-command
   register: torun
@@ -48,10 +44,21 @@
 #     path: ..//files/joincommand.sh
 #     state: absent
 
-- name: Ansible fetch files from remote server to the local machine using Ansible fetch module
+- name: Fetch joincommand.sh
   fetch:
     src: /tmp/joincommand.sh
     dest: ./roles/k8sminion/files/
     flat: yes
     mode: 0774
     fail_on_missing: yes
+
+- name: Fetch ~/.kube/config
+  fetch:
+    src: ~/.kube/config
+    dest: ./roles/k8sminion/files/
+    flat: yes
+    mode: 0774
+    fail_on_missing: yes
+
+- name: deploy overlay network
+  shell: kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
